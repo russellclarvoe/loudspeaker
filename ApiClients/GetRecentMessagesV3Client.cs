@@ -11,7 +11,7 @@ namespace Loudspeaker.ApiClients
 
         partial void Initialize()
         {
-            this.ReadResponseAsString = true;
+            
         }
     }
 }

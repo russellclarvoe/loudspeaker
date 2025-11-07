@@ -1,26 +1,33 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Loudspeaker.ApiClients;
 using Loudspeaker.Models;
 using Loudspeaker.Services;
+using NAudio.Wave;
 using ReactiveUI;
 using UserModel = Loudspeaker.Models.User;
 using static Loudspeaker.Services.Logger;
 
 namespace Loudspeaker.ViewModels;
 
-public class MainViewModel : ViewModelBase
+public class MainViewModel : ViewModelBase, IDisposable
 {
     private readonly FirebaseAuthService _authService;
     private readonly AuthStateManager _authStateManager;
     private readonly AuthenticatedCarbonVoiceClient _apiClient;
+    private readonly HttpClient _httpClient;
     private string _userDisplayName = string.Empty;
     private string _userEmail = string.Empty;
     private bool _isLoadingMessages;
     private string? _messagesError;
+    private WaveOutEvent? _currentAudioPlayer;
+    private bool _disposed;
 
     public MainViewModel(
         FirebaseAuthService authService,
@@ -30,9 +37,11 @@ public class MainViewModel : ViewModelBase
         _authService = authService;
         _authStateManager = authStateManager;
         _apiClient = apiClient;
+        _httpClient = new HttpClient();
 
         Messages = new ObservableCollection<MessageV2>();
         SignOutCommand = ReactiveCommand.Create(SignOut);
+        PlayAudioCommand = ReactiveCommand.CreateFromTask<MessageV2>(PlayAudioAsync);
 
         // Update user info when it changes
         _authStateManager.UserChanged += OnUserChanged;
@@ -90,8 +99,7 @@ public class MainViewModel : ViewModelBase
         {
             Log("[MainViewModel] Loading recent messages...");
             var client = _apiClient.GetRecentMessagesV3Client();
-            // Ensure ReadResponseAsString is set to true (it should already be set by Initialize())
-            client.ReadResponseAsString = true;
+            
             
             var queryParams = new MessageQueryParameters
             {
@@ -107,7 +115,7 @@ public class MainViewModel : ViewModelBase
             if (messages != null)
             {
                 // Take only the 10 most recent messages
-                foreach (var message in messages.Take(10))
+                foreach (var message in messages.OrderByDescending(m=>m.Created_at).Take(10))
                 {
                     Messages.Add(message);
                 }
@@ -160,9 +168,151 @@ public class MainViewModel : ViewModelBase
 
     public bool HasMessagesError => !string.IsNullOrEmpty(_messagesError);
 
+    public string? Pxtoken => _authStateManager.Pxtoken;
+
+    public ICommand PlayAudioCommand { get; }
+
     private void SignOut()
     {
         _authService.SignOut();
+    }
+
+    private async Task PlayAudioAsync(MessageV2 message)
+    {
+        if (message == null)
+            return;
+
+        var audioModel = message.Audio_models?.FirstOrDefault(a => !a.Streaming);
+        if (audioModel == null || string.IsNullOrEmpty(audioModel.Url))
+        {
+            Log("[MainViewModel] No non-streaming audio model found for message");
+            return;
+        }
+
+        var pxtoken = _authStateManager.Pxtoken;
+        if (string.IsNullOrEmpty(pxtoken))
+        {
+            Log("[MainViewModel] Cannot play audio: pxtoken is not available");
+            return;
+        }
+
+        try
+        {
+            // Stop any currently playing audio
+            StopCurrentAudio();
+
+            var url = audioModel.Url;
+            var separator = url.Contains('?') ? "&" : "?";
+            var urlWithToken = $"{url}{separator}pxtoken={Uri.EscapeDataString(pxtoken)}";
+            
+            Log($"[MainViewModel] Downloading audio from: {urlWithToken}");
+            
+            // Download the audio file
+            var audioBytes = await _httpClient.GetByteArrayAsync(urlWithToken);
+            
+            Log($"[MainViewModel] Audio downloaded ({audioBytes.Length} bytes), starting playback...");
+            
+            // Play the audio using NAudio
+            await PlayAudioBytesAsync(audioBytes);
+        }
+        catch (Exception ex)
+        {
+            Log($"[MainViewModel] Error playing audio: {ex.Message}");
+            if (ex.InnerException != null)
+            {
+                Log($"[MainViewModel] Inner exception: {ex.InnerException.Message}");
+            }
+        }
+    }
+
+    private async Task PlayAudioBytesAsync(byte[] audioBytes)
+    {
+        MemoryStream? audioStream = null;
+        Mp3FileReader? mp3Reader = null;
+        
+        try
+        {
+            // Create a memory stream from the audio bytes
+            audioStream = new MemoryStream(audioBytes);
+            
+            // Create MP3 file reader
+            mp3Reader = new Mp3FileReader(audioStream);
+            
+            // Create wave output device
+            _currentAudioPlayer = new WaveOutEvent();
+            _currentAudioPlayer.Init(mp3Reader);
+            
+            Log("[MainViewModel] Starting audio playback...");
+            _currentAudioPlayer.Play();
+            
+            // Wait for playback to complete
+            while (_currentAudioPlayer.PlaybackState == PlaybackState.Playing)
+            {
+                await Task.Delay(100);
+            }
+            
+            Log("[MainViewModel] Audio playback completed");
+        }
+        finally
+        {
+            // Clean up - dispose in reverse order
+            if (_currentAudioPlayer != null)
+            {
+                _currentAudioPlayer.Dispose();
+                _currentAudioPlayer = null;
+            }
+            
+            mp3Reader?.Dispose();
+            audioStream?.Dispose();
+        }
+    }
+
+    private void StopCurrentAudio()
+    {
+        if (_currentAudioPlayer != null)
+        {
+            try
+            {
+                _currentAudioPlayer.Stop();
+                _currentAudioPlayer.Dispose();
+                Log("[MainViewModel] Stopped previous audio playback");
+            }
+            catch (Exception ex)
+            {
+                Log($"[MainViewModel] Error stopping audio: {ex.Message}");
+            }
+            finally
+            {
+                _currentAudioPlayer = null;
+            }
+        }
+    }
+
+    public static string? GetTranscriptText(MessageV2? message)
+    {
+        if (message?.Text_models == null)
+            return null;
+
+        var transcriptModel = message.Text_models.FirstOrDefault(tm => tm.Type == TextModelType.Transcript);
+        return transcriptModel?.Value;
+    }
+
+    public static bool HasAudioToPlay(MessageV2? message)
+    {
+        if (message?.Audio_models == null)
+            return false;
+
+        return message.Audio_models.Any(a => !a.Streaming);
+    }
+
+    public void Dispose()
+    {
+        if (_disposed)
+            return;
+
+        StopCurrentAudio();
+        _httpClient?.Dispose();
+        _disposed = true;
     }
 }
 

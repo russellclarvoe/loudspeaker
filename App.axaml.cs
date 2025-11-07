@@ -40,6 +40,9 @@ public partial class App : Application
             // Initialize FirebaseAuthService (depends on CarbonVoiceAuthService)
             var firebaseAuthService = new FirebaseAuthService(appConfig, tokenExchangeApiClient, authStateManager, carbonVoiceAuthService);
 
+            // Initialize WebSocket service (will auto-connect when pxtoken is available)
+            var webSocketService = new CarbonVoiceWebSocketService(authStateManager);
+
             // Create main window
             desktop.MainWindow = new MainWindow
             {

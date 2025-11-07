@@ -3,9 +3,14 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="clr-namespace:Loudspeaker.ViewModels"
+             xmlns:apiClients="clr-namespace:Loudspeaker.ApiClients"
              x:Class="Loudspeaker.Views.MainView"
              x:DataType="viewModels:MainViewModel"
+             x:Name="MainViewControl"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600">
+    <UserControl.Resources>
+        <viewModels:MessageHelper x:Key="MessageHelper"/>
+    </UserControl.Resources>
     <Grid RowDefinitions="Auto,*" Margin="20">
         <Border Grid.Row="0" 
                 Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
@@ -47,19 +52,17 @@
                                   IsVisible="{Binding !IsLoadingMessages}">
                         <ItemsControl ItemsSource="{Binding Messages}">
                             <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                                <DataTemplate x:DataType="apiClients:MessageV2">
+                                    <Border x:Name="border"
+                                            Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
                                             CornerRadius="4"
                                             Padding="15"
                                             Margin="0,0,0,10">
                                         <StackPanel>
                                             <Grid ColumnDefinitions="*,Auto">
                                                 <StackPanel Grid.Column="0">
-                                                    <TextBlock Text="{Binding Name, TargetNullValue='(No name)'}" 
-                                                              FontSize="16" 
-                                                              FontWeight="SemiBold"
-                                                              Margin="0,0,0,5"/>
-                                                    <TextBlock Text="{Binding Notes}" 
+                                                   
+                                                    <TextBlock Text="{Binding Converter={StaticResource MessageHelper}, ConverterParameter='Transcript', TargetNullValue='(No transcript)'}" 
                                                               FontSize="14"
                                                               TextWrapping="Wrap"
                                                               Margin="0,0,0,5"/>
@@ -69,11 +72,20 @@
                                                         <Run Text="{Binding Created_at, StringFormat='{}{0:g}'}"/>
                                                     </TextBlock>
                                                 </StackPanel>
-                                                <TextBlock Grid.Column="1"
-                                                          Text="{Binding Status}"
-                                                          FontSize="12"
-                                                          Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
-                                                          VerticalAlignment="Top"/>
+                                                <StackPanel Grid.Column="1" 
+                                                          VerticalAlignment="Top"
+                                                          Spacing="5">
+                                                    <TextBlock Text="{Binding Status}"
+                                                              FontSize="12"
+                                                              Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                                                              Margin="0,0,0,5"/>
+                                                    <Button Content="▶ Play"
+                                                            Command="{Binding #MainViewControl.ViewModel.PlayAudioCommand}"
+                                                            CommandParameter="{Binding}"
+                                                            IsVisible="{Binding Converter={StaticResource MessageHelper}, ConverterParameter='HasAudio'}"
+                                                            Padding="10,5"
+                                                            HorizontalAlignment="Right"/>
+                                                </StackPanel>
                                             </Grid>
                                         </StackPanel>
                                     </Border>
