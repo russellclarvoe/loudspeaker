@@ -1,0 +1,103 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:Loudspeaker.ViewModels"
+             x:Class="Loudspeaker.Views.MainView"
+             x:DataType="viewModels:MainViewModel"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600">
+    <Grid RowDefinitions="Auto,*" Margin="20">
+        <Border Grid.Row="0" 
+                Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                CornerRadius="8"
+                Padding="20"
+                Margin="0,0,0,20">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="{Binding UserDisplayName}" 
+                              FontSize="20" 
+                              FontWeight="Bold"
+                              Margin="0,0,0,5"/>
+                    <TextBlock Text="{Binding UserEmail}" 
+                              FontSize="14"
+                              Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                </StackPanel>
+                <Button Grid.Column="1" 
+                       Content="Sign Out" 
+                       Command="{Binding SignOutCommand}"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"
+                       Padding="20,10"/>
+            </Grid>
+        </Border>
+        
+        <Border Grid.Row="1" 
+                Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                CornerRadius="8"
+                Padding="20">
+            <Grid RowDefinitions="Auto,*">
+                <TextBlock Grid.Row="0" 
+                          Text="Recent Messages" 
+                          FontSize="18" 
+                          FontWeight="Bold"
+                          Margin="0,0,0,15"/>
+                
+                <Grid Grid.Row="1">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                  IsVisible="{Binding !IsLoadingMessages}">
+                        <ItemsControl ItemsSource="{Binding Messages}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                                            CornerRadius="4"
+                                            Padding="15"
+                                            Margin="0,0,0,10">
+                                        <StackPanel>
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <StackPanel Grid.Column="0">
+                                                    <TextBlock Text="{Binding Name, TargetNullValue='(No name)'}" 
+                                                              FontSize="16" 
+                                                              FontWeight="SemiBold"
+                                                              Margin="0,0,0,5"/>
+                                                    <TextBlock Text="{Binding Notes}" 
+                                                              FontSize="14"
+                                                              TextWrapping="Wrap"
+                                                              Margin="0,0,0,5"/>
+                                                    <TextBlock FontSize="12"
+                                                              Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}">
+                                                        <Run Text="Created: "/>
+                                                        <Run Text="{Binding Created_at, StringFormat='{}{0:g}'}"/>
+                                                    </TextBlock>
+                                                </StackPanel>
+                                                <TextBlock Grid.Column="1"
+                                                          Text="{Binding Status}"
+                                                          FontSize="12"
+                                                          Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                                                          VerticalAlignment="Top"/>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                    
+                    <TextBlock Text="Loading messages..." 
+                              FontSize="14"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center"
+                              IsVisible="{Binding IsLoadingMessages}"/>
+                    
+                    <TextBlock Text="{Binding MessagesError}" 
+                              FontSize="14"
+                              Foreground="Red"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center"
+                              TextWrapping="Wrap"
+                              IsVisible="{Binding HasMessagesError}"/>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>
+

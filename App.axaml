@@ -1,0 +1,19 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:views="clr-namespace:Loudspeaker.Views"
+             xmlns:viewModels="clr-namespace:Loudspeaker.ViewModels"
+             x:Class="Loudspeaker.App"
+             RequestedThemeVariant="Default">
+    <Application.DataTemplates>
+        <DataTemplate DataType="{x:Type viewModels:LoginViewModel}">
+            <views:LoginView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:MainViewModel}">
+            <views:MainView />
+        </DataTemplate>
+    </Application.DataTemplates>
+    <Application.Styles>
+        <FluentTheme />
+    </Application.Styles>
+</Application>
+
