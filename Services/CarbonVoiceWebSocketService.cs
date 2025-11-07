@@ -1,10 +1,11 @@
 using System;
-using System.Net.WebSockets;
+using System.Collections.Generic;
 using System.Reactive.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ReactiveUI;
+using SocketIOClient;
+using SocketIOClient.Transport;
 using static Loudspeaker.Services.Logger;
 
 namespace Loudspeaker.Services;
@@ -12,12 +13,11 @@ namespace Loudspeaker.Services;
 public class CarbonVoiceWebSocketService : IDisposable
 {
     private readonly AuthStateManager _authStateManager;
-    private ClientWebSocket? _webSocket;
-    private CancellationTokenSource? _cancellationTokenSource;
-    private Task? _receiveTask;
+    private SocketIO? _socket;
     private bool _isConnected;
     private bool _disposed;
     private IDisposable? _pxtokenSubscription;
+    private readonly List<(string eventName, Action<SocketIOResponse> handler)> _eventHandlers = new();
 
     public bool IsConnected
     {
@@ -84,7 +84,7 @@ public class CarbonVoiceWebSocketService : IDisposable
 
     public async Task ConnectAsync(CancellationToken cancellationToken = default)
     {
-        if (_webSocket != null && _webSocket.State == WebSocketState.Open)
+        if (_socket != null && _socket.Connected)
         {
             Log("[CarbonVoiceWebSocketService] Already connected");
             return;
@@ -99,21 +99,75 @@ public class CarbonVoiceWebSocketService : IDisposable
 
         try
         {
-            Log("[CarbonVoiceWebSocketService] Connecting to wss://ws.carbonvoice.app...");
+            Log("[CarbonVoiceWebSocketService] Connecting to Socket.IO server at wss://ws.carbonvoice.app...");
             
-            _webSocket = new ClientWebSocket();
-            _cancellationTokenSource = new CancellationTokenSource();
+            // Disconnect existing socket if any
+            if (_socket != null)
+            {
+                await _socket.DisconnectAsync();
+                _socket.Dispose();
+            }
             
-            // Set the pxtoken header
-            _webSocket.Options.SetRequestHeader("pxtoken", pxtoken);
+            // Create Socket.IO client with options
+            var options = new SocketIOOptions
+            {
+                Transport = TransportProtocol.WebSocket,
+                AutoUpgrade = true, // Automatically upgrade from polling to WebSocket
+                Reconnection = true,
+                ReconnectionDelay = 1000,
+                ReconnectionDelayMax = 5000
+            };
             
-            await _webSocket.ConnectAsync(new Uri("wss://ws.carbonvoice.app"), cancellationToken);
+            // Set the pxtoken as an extra header (Socket.IO supports headers)
+            options.ExtraHeaders = new Dictionary<string, string>
+            {
+                { "pxtoken", pxtoken }
+            };
             
-            IsConnected = true;
-            Log("[CarbonVoiceWebSocketService] Successfully connected to WebSocket");
+            // Also set as query parameter (some Socket.IO servers prefer this)
+            // The library will append this to the connection URL
+            options.Query = new Dictionary<string, string>
+            {
+                { "pxtoken", pxtoken }
+            };
             
-            // Start receiving messages
-            _receiveTask = Task.Run(() => ReceiveMessagesAsync(_cancellationTokenSource.Token));
+            // For Socket.IO, use the base URL - the library handles the /socket.io/ path
+            // Use wss:// explicitly, or https:// (the library will use the appropriate protocol)
+            _socket = new SocketIO("wss://ws.carbonvoice.app", options);
+            
+            // Register all event handlers (both pending and previously registered ones)
+            foreach (var (eventName, handler) in _eventHandlers)
+            {
+                _socket.On(eventName, handler);
+                Log($"[CarbonVoiceWebSocketService] Registered handler for event: {eventName}");
+            }
+            
+            // Set up event handlers
+            _socket.OnConnected += (sender, e) =>
+            {
+                IsConnected = true;
+                Log("[CarbonVoiceWebSocketService] Successfully connected to Socket.IO server");
+            };
+            
+            _socket.OnDisconnected += (sender, e) =>
+            {
+                IsConnected = false;
+                Log($"[CarbonVoiceWebSocketService] Disconnected from Socket.IO server: {e}");
+            };
+            
+            _socket.OnError += (sender, e) =>
+            {
+                Log($"[CarbonVoiceWebSocketService] Socket.IO error: {e}");
+            };
+            
+            // Handle any event (catch-all for messages)
+            _socket.OnAny((eventName, response) =>
+            {
+                Log($"[CarbonVoiceWebSocketService] Event received: {eventName}, Data: {response}");
+            });
+            
+            // Connect to the server
+            await _socket.ConnectAsync();
         }
         catch (Exception ex)
         {
@@ -127,77 +181,9 @@ public class CarbonVoiceWebSocketService : IDisposable
         }
     }
 
-    private async Task ReceiveMessagesAsync(CancellationToken cancellationToken)
-    {
-        if (_webSocket == null)
-        {
-            return;
-        }
-
-        var buffer = new byte[4096];
-        
-        try
-        {
-            while (!cancellationToken.IsCancellationRequested && _webSocket.State == WebSocketState.Open)
-            {
-                var result = await _webSocket.ReceiveAsync(
-                    new ArraySegment<byte>(buffer), cancellationToken);
-
-                if (result.MessageType == WebSocketMessageType.Close)
-                {
-                    Log("[CarbonVoiceWebSocketService] WebSocket close message received");
-                    await _webSocket.CloseAsync(
-                        WebSocketCloseStatus.NormalClosure,
-                        "Closed by server",
-                        cancellationToken);
-                    IsConnected = false;
-                    break;
-                }
-
-                if (result.MessageType == WebSocketMessageType.Text)
-                {
-                    var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                    
-                    // Handle multi-part messages
-                    if (!result.EndOfMessage)
-                    {
-                        var fullMessage = new StringBuilder(message);
-                        while (!result.EndOfMessage)
-                        {
-                            result = await _webSocket.ReceiveAsync(
-                                new ArraySegment<byte>(buffer), cancellationToken);
-                            fullMessage.Append(Encoding.UTF8.GetString(buffer, 0, result.Count));
-                        }
-                        message = fullMessage.ToString();
-                    }
-                    
-                    Log($"[CarbonVoiceWebSocketService] Message received: {message}");
-                }
-                else if (result.MessageType == WebSocketMessageType.Binary)
-                {
-                    Log($"[CarbonVoiceWebSocketService] Binary message received ({result.Count} bytes)");
-                }
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            Log("[CarbonVoiceWebSocketService] Receive operation was cancelled");
-        }
-        catch (WebSocketException ex)
-        {
-            Log($"[CarbonVoiceWebSocketService] WebSocket error during receive: {ex.WebSocketErrorCode} - {ex.Message}");
-            IsConnected = false;
-        }
-        catch (Exception ex)
-        {
-            Log($"[CarbonVoiceWebSocketService] ERROR: Exception during receive: {ex.GetType().Name} - {ex.Message}");
-            IsConnected = false;
-        }
-    }
-
     public async Task DisconnectAsync(CancellationToken cancellationToken = default)
     {
-        if (_webSocket == null || _webSocket.State != WebSocketState.Open)
+        if (_socket == null || !_socket.Connected)
         {
             return;
         }
@@ -205,24 +191,57 @@ public class CarbonVoiceWebSocketService : IDisposable
         try
         {
             Log("[CarbonVoiceWebSocketService] Disconnecting...");
-            _cancellationTokenSource?.Cancel();
-            
-            await _webSocket.CloseAsync(
-                WebSocketCloseStatus.NormalClosure,
-                "Client closing",
-                cancellationToken);
-            
-            if (_receiveTask != null)
-            {
-                await _receiveTask;
-            }
-            
+            await _socket.DisconnectAsync();
             IsConnected = false;
             Log("[CarbonVoiceWebSocketService] Disconnected successfully");
         }
         catch (Exception ex)
         {
             Log($"[CarbonVoiceWebSocketService] ERROR during disconnect: {ex.GetType().Name} - {ex.Message}");
+        }
+    }
+    
+    /// <summary>
+    /// Emit an event to the server
+    /// </summary>
+    public async Task EmitAsync(string eventName, object? data = null)
+    {
+        if (_socket == null || !_socket.Connected)
+        {
+            Log($"[CarbonVoiceWebSocketService] Cannot emit event '{eventName}' - not connected");
+            return;
+        }
+        
+        try
+        {
+            await _socket.EmitAsync(eventName, data);
+            Log($"[CarbonVoiceWebSocketService] Emitted event: {eventName}");
+        }
+        catch (Exception ex)
+        {
+            Log($"[CarbonVoiceWebSocketService] ERROR emitting event '{eventName}': {ex.Message}");
+        }
+    }
+    
+    /// <summary>
+    /// Subscribe to a specific event. Handlers can be registered before connection and will be applied when the socket connects.
+    /// Handlers are persisted across reconnections.
+    /// </summary>
+    public void On(string eventName, Action<SocketIOResponse> handler)
+    {
+        // Always store the handler so it persists across reconnections
+        _eventHandlers.Add((eventName, handler));
+        
+        if (_socket != null)
+        {
+            // Socket is already created, register immediately
+            _socket.On(eventName, handler);
+            Log($"[CarbonVoiceWebSocketService] Subscribed to event: {eventName}");
+        }
+        else
+        {
+            // Socket not created yet, handler will be registered when socket is created
+            Log($"[CarbonVoiceWebSocketService] Queued handler for event '{eventName}' (will be registered on connection)");
         }
     }
 
@@ -244,9 +263,9 @@ public class CarbonVoiceWebSocketService : IDisposable
             // Ignore errors during disposal
         }
 
-        _cancellationTokenSource?.Dispose();
-        _webSocket?.Dispose();
+        _socket?.Dispose();
         _disposed = true;
     }
 }
+
 

@@ -46,7 +46,7 @@ public partial class App : Application
             // Create main window
             desktop.MainWindow = new MainWindow
             {
-                DataContext = new MainWindowViewModel(firebaseAuthService, authStateManager, authenticatedCarbonVoiceClient)
+                DataContext = new MainWindowViewModel(firebaseAuthService, authStateManager, authenticatedCarbonVoiceClient, webSocketService)
             };
         }
 

@@ -12,16 +12,19 @@ public class MainWindowViewModel : ViewModelBase
     private readonly FirebaseAuthService _authService;
     private readonly AuthStateManager _authStateManager;
     private readonly AuthenticatedCarbonVoiceClient _apiClient;
+    private readonly CarbonVoiceWebSocketService _webSocketService;
     private ViewModelBase _currentView;
 
     public MainWindowViewModel(
         FirebaseAuthService authService,
         AuthStateManager authStateManager,
-        AuthenticatedCarbonVoiceClient apiClient)
+        AuthenticatedCarbonVoiceClient apiClient,
+        CarbonVoiceWebSocketService webSocketService)
     {
         _authService = authService;
         _authStateManager = authStateManager;
         _apiClient = apiClient;
+        _webSocketService = webSocketService;
 
         // Initialize with login view
         _currentView = new LoginViewModel(_authService);
@@ -31,7 +34,7 @@ public class MainWindowViewModel : ViewModelBase
             .Subscribe(isAuthenticated =>
             {
                 CurrentView = isAuthenticated
-                    ? new MainViewModel(_authService, _authStateManager, _apiClient)
+                    ? new MainViewModel(_authService, _authStateManager, _apiClient, _webSocketService)
                     : new LoginViewModel(_authService);
             });
     }

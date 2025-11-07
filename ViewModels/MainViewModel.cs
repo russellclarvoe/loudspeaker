@@ -6,11 +6,14 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using LibVLCSharp.Shared;
 using Loudspeaker.ApiClients;
 using Loudspeaker.Models;
 using Loudspeaker.Services;
 using NAudio.Wave;
+using Newtonsoft.Json;
 using ReactiveUI;
+using SocketIOClient;
 using UserModel = Loudspeaker.Models.User;
 using static Loudspeaker.Services.Logger;
 
@@ -21,23 +24,39 @@ public class MainViewModel : ViewModelBase, IDisposable
     private readonly FirebaseAuthService _authService;
     private readonly AuthStateManager _authStateManager;
     private readonly AuthenticatedCarbonVoiceClient _apiClient;
+    private readonly CarbonVoiceWebSocketService _webSocketService;
     private readonly HttpClient _httpClient;
     private string _userDisplayName = string.Empty;
     private string _userEmail = string.Empty;
     private bool _isLoadingMessages;
     private string? _messagesError;
     private WaveOutEvent? _currentAudioPlayer;
+    private LibVLC? _libVlc;
+    private MediaPlayer? _hlsPlayer;
+    private Media? _currentHlsMedia;
     private bool _disposed;
 
     public MainViewModel(
         FirebaseAuthService authService,
         AuthStateManager authStateManager,
-        AuthenticatedCarbonVoiceClient apiClient)
+        AuthenticatedCarbonVoiceClient apiClient,
+        CarbonVoiceWebSocketService webSocketService)
     {
         _authService = authService;
         _authStateManager = authStateManager;
         _apiClient = apiClient;
+        _webSocketService = webSocketService;
         _httpClient = new HttpClient();
+
+        // Initialize LibVLC for HLS playback
+        Core.Initialize();
+        
+        // Initialize LibVLC with audio output enabled
+        // On Windows, we want to use the default audio output
+        _libVlc = new LibVLC(enableDebugLogs: false);
+        _hlsPlayer = new MediaPlayer(_libVlc);
+        
+        Log("[MainViewModel] LibVLC initialized");
 
         Messages = new ObservableCollection<MessageV2>();
         SignOutCommand = ReactiveCommand.Create(SignOut);
@@ -69,7 +88,325 @@ public class MainViewModel : ViewModelBase, IDisposable
                     MessagesError = null;
                 }
             });
+
+        // Subscribe to Socket.IO events for message updates
+        SubscribeToWebSocketEvents();
     }
+
+    private void SubscribeToWebSocketEvents()
+    {
+        // Subscribe to message:started event
+        _webSocketService.On("message:started", response =>
+        {
+            Log("[MainViewModel] message:started event received");
+            _ = HandleMessageStartedAsync(response);
+        });
+
+        // Subscribe to message:finished event
+        _webSocketService.On("message:finished", response =>
+        {
+            Log("[MainViewModel] message:finished event received, reloading messages...");
+            _ = LoadMessagesAsync();
+        });
+
+        // Subscribe to message:finished event
+        _webSocketService.On("message:created", response =>
+        {
+            Log("[MainViewModel] message:created event received");
+            _ = HandleMessageCreatedAsync(response);
+        });
+        Log("[MainViewModel] Subscribed to message:started, message:finished, and message:created events");
+    }
+
+    private async Task HandleMessageStartedAsync(SocketIOResponse response)
+    {
+        try
+        {
+            Log("[MainViewModel] Processing message:started event...");
+            
+            // Refresh messages from the API first
+            Log("[MainViewModel] Refreshing messages from API...");
+            await LoadMessagesAsync();
+            
+            // Get the newest message from the refreshed list
+            var message = Messages
+                .OrderByDescending(m => m.Created_at)
+                .FirstOrDefault();
+            
+            if (message != null)
+            {
+                Log("[MainViewModel] Found newest message");
+                
+                // Find the audio model with Streaming = true
+                var streamingAudioModel = message.Audio_models?.FirstOrDefault(a => a.Streaming);
+                
+                if (streamingAudioModel != null && !string.IsNullOrEmpty(streamingAudioModel.Url))
+                {
+                    var m3u8Url = streamingAudioModel.Url;
+                    
+                    // Add pxtoken to URL if needed
+                    var pxtoken = _authStateManager.Pxtoken;
+                    if (!string.IsNullOrEmpty(pxtoken) && !m3u8Url.Contains("pxtoken"))
+                    {
+                        var separator = m3u8Url.Contains('?') ? "&" : "?";
+                        m3u8Url = $"{m3u8Url}{separator}pxtoken={Uri.EscapeDataString(pxtoken)}";
+                    }
+                    
+                    Log($"[MainViewModel] Waiting 3 seconds before starting HLS playback for URL: {m3u8Url}");
+                    //await Task.Delay(3000);
+                    Log($"[MainViewModel] Starting HLS playback for URL: {m3u8Url}");
+                    //await PlayHlsStreamAsync(m3u8Url);
+                }
+                else
+                {
+                    Log("[MainViewModel] No streaming audio model found in newest message");
+                }
+            }
+            else
+            {
+                Log("[MainViewModel] No messages found after refresh");
+            }
+        }
+        catch (Exception ex)
+        {
+            Log($"[MainViewModel] Error handling message:started event: {ex.Message}");
+            if (ex.InnerException != null)
+            {
+                Log($"[MainViewModel] Inner exception: {ex.InnerException.Message}");
+            }
+        }
+    }
+
+    private async Task HandleMessageCreatedAsync(SocketIOResponse response)
+    {
+        try
+        {
+            Log("[MainViewModel] Processing message:created event...");
+
+            // Refresh messages from the API first
+            Log("[MainViewModel] Refreshing messages from API...");
+            await LoadMessagesAsync();
+
+            // Get the newest message with a non-streaming audio model
+            var message = Messages
+                .OrderByDescending(m => m.Created_at)
+                .FirstOrDefault(m => m.Audio_models?.Any(a => !a.Streaming && !string.IsNullOrEmpty(a.Url)) == true);
+
+            if (message != null)
+            {
+                Log("[MainViewModel] Found newest message with non-streaming audio, preparing playback");
+
+                // Stop any active HLS playback before starting downloadable audio
+                StopHlsPlayback();
+
+                await PlayAudioAsync(message);
+            }
+            else
+            {
+                Log("[MainViewModel] No non-streaming audio available after refresh");
+            }
+        }
+        catch (Exception ex)
+        {
+            Log($"[MainViewModel] Error handling message:created event: {ex.Message}");
+            if (ex.InnerException != null)
+            {
+                Log($"[MainViewModel] Inner exception: {ex.InnerException.Message}");
+            }
+        }
+    }
+
+    private async Task PlayHlsStreamAsync(string m3u8Url)
+    {
+        try
+        {
+            // Stop any currently playing HLS stream
+            StopHlsPlayback();
+            
+            if (_hlsPlayer == null || _libVlc == null)
+            {
+                Log("[MainViewModel] HLS player not initialized");
+                return;
+            }
+            
+            Log($"[MainViewModel] Creating media from URL: {m3u8Url}");
+            
+            // Dispose previous media if any
+            _currentHlsMedia?.Dispose();
+            
+            // Create media from the m3u8 URL
+            _currentHlsMedia = new Media(_libVlc, m3u8Url, FromType.FromLocation);
+            
+            // Set up event handlers (only once, but we'll handle duplicates)
+            _hlsPlayer.Playing += OnHlsPlaying;
+            _hlsPlayer.EndReached += OnHlsEndReached;
+            _hlsPlayer.EncounteredError += OnHlsError;
+            
+            // Set the media on the player first
+            _hlsPlayer.Media = _currentHlsMedia;
+            
+            // Parse the media first to ensure it's ready
+            Log("[MainViewModel] Parsing media...");
+            try
+            {
+                await _currentHlsMedia.Parse();
+                Log("[MainViewModel] Media parsed successfully");
+                
+                // Check for audio tracks after parsing
+                var tracks = _currentHlsMedia.Tracks;
+                Log($"[MainViewModel] Found {tracks?.Count() ?? 0} tracks");
+                if (tracks != null)
+                {
+                    var audioTracks = tracks.Where(t => t.TrackType == TrackType.Audio).ToList();
+                    Log($"[MainViewModel] Found {audioTracks.Count} audio tracks");
+                    foreach (var track in audioTracks)
+                    {
+                        Log($"[MainViewModel] Audio track: Codec={track.Codec}, Language={track.Language}, Description={track.Description}");
+                    }
+                }
+            }
+            catch (Exception parseEx)
+            {
+                Log($"[MainViewModel] Media parse warning: {parseEx.Message}");
+                // Continue anyway - parsing is optional for playback
+            }
+            
+            // Ensure volume and mute are set before playing
+            _hlsPlayer.Mute = false;
+            Log($"[MainViewModel] Initial volume: {_hlsPlayer.Volume}, Mute: {_hlsPlayer.Mute}");
+            
+            // Play the stream
+            Log("[MainViewModel] Attempting to play media...");
+            var result = _hlsPlayer.Play();
+            if (!result)
+            {
+                Log("[MainViewModel] Failed to start HLS playback - Play() returned false");
+            }
+            else
+            {
+                Log($"[MainViewModel] HLS playback started, current state: {_hlsPlayer.State}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Log($"[MainViewModel] Error playing HLS stream: {ex.Message}");
+            if (ex.InnerException != null)
+            {
+                Log($"[MainViewModel] Inner exception: {ex.InnerException.Message}");
+            }
+            Log($"[MainViewModel] Stack trace: {ex.StackTrace}");
+        }
+    }
+
+    private void StopHlsPlayback()
+    {
+        try
+        {
+            if (_hlsPlayer != null)
+            {
+                // Remove event handlers to prevent leaks
+                _hlsPlayer.Playing -= OnHlsPlaying;
+                _hlsPlayer.EndReached -= OnHlsEndReached;
+                _hlsPlayer.EncounteredError -= OnHlsError;
+                
+                _hlsPlayer.Stop();
+                Log("[MainViewModel] Stopped HLS playback");
+            }
+            
+            // Dispose the media
+            _currentHlsMedia?.Dispose();
+            _currentHlsMedia = null;
+        }
+        catch (Exception ex)
+        {
+            Log($"[MainViewModel] Error stopping HLS playback: {ex.Message}");
+        }
+    }
+
+    private async void OnHlsPlaying(object? sender, EventArgs e)
+    {
+        if (_hlsPlayer != null)
+        {
+            Log($"[MainViewModel] HLS stream started playing - State: {_hlsPlayer.State}, Volume: {_hlsPlayer.Volume}, Mute: {_hlsPlayer.Mute}");
+            
+            // Wait a bit for the media to fully load before setting volume
+            // HLS streams need time to download the first segment
+            await Task.Delay(500);
+            
+            // Try to set volume multiple times if needed (volume might not be settable immediately)
+            for (int i = 0; i < 5; i++)
+            {
+                _hlsPlayer.Volume = 100;
+                _hlsPlayer.Mute = false;
+                var currentVolume = _hlsPlayer.Volume;
+                Log($"[MainViewModel] Attempt {i + 1}: Set volume to 100, actual volume: {currentVolume}");
+                
+                if (currentVolume >= 0)
+                {
+                    Log($"[MainViewModel] Volume successfully set to {currentVolume}");
+                    break;
+                }
+                
+                await Task.Delay(200);
+            }
+            
+            // Check audio tracks after a delay (HLS tracks might not be available immediately)
+            await Task.Delay(1000);
+            
+            if (_currentHlsMedia != null)
+            {
+                try
+                {
+                    // Re-parse to get tracks if they weren't available before
+                    await _currentHlsMedia.Parse();
+                    
+                    var tracks = _currentHlsMedia.Tracks;
+                    Log($"[MainViewModel] Media tracks after playback: {tracks?.Count() ?? 0}");
+                    
+                    if (tracks != null)
+                    {
+                        var audioTracks = tracks.Where(t => t.TrackType == TrackType.Audio).ToList();
+                        Log($"[MainViewModel] Available audio tracks: {audioTracks.Count}");
+                        
+                        foreach (var track in audioTracks)
+                        {
+                            Log($"[MainViewModel] Audio track: Id={track.Id}, Codec={track.Codec}, Language={track.Language}, Description={track.Description}");
+                        }
+                        
+                        // Try to set audio track if available
+                        if (audioTracks.Count > 0)
+                        {
+                            var audioTrackId = audioTracks[0].Id;
+                            _hlsPlayer.SetAudioTrack(audioTrackId);
+                            Log($"[MainViewModel] Set audio track to ID: {audioTrackId}");
+                        }
+                        else
+                        {
+                            Log("[MainViewModel] WARNING: No audio tracks found in HLS stream!");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log($"[MainViewModel] Error checking tracks: {ex.Message}");
+                }
+            }
+            
+            // Final volume check
+            Log($"[MainViewModel] Final state - Volume: {_hlsPlayer.Volume}, Mute: {_hlsPlayer.Mute}, State: {_hlsPlayer.State}");
+        }
+    }
+
+    private void OnHlsEndReached(object? sender, EventArgs e)
+    {
+        Log("[MainViewModel] HLS stream ended");
+    }
+
+    private void OnHlsError(object? sender, EventArgs e)
+    {
+        Log($"[MainViewModel] HLS player error occurred - State: {_hlsPlayer?.State}");
+    }
+
 
     private void OnUserChanged(object? sender, UserModel? user)
     {
@@ -311,6 +648,11 @@ public class MainViewModel : ViewModelBase, IDisposable
             return;
 
         StopCurrentAudio();
+        StopHlsPlayback();
+        
+        _currentHlsMedia?.Dispose();
+        _hlsPlayer?.Dispose();
+        _libVlc?.Dispose();
         _httpClient?.Dispose();
         _disposed = true;
     }
