@@ -12,8 +12,7 @@ partial class AdminControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
             )
         );
     }
@@ -25,8 +24,7 @@ partial class AIPromptControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
             )
         );
     }
@@ -38,8 +36,7 @@ partial class AIResponseControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
             )
         );
     }
@@ -51,8 +48,7 @@ partial class AnswersControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
             )
         );
     }
@@ -75,8 +71,7 @@ partial class UserControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
             )
         );
     }
@@ -88,8 +83,8 @@ partial class ContactInfoControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -101,8 +96,8 @@ partial class ChannelControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -114,8 +109,8 @@ partial class AuthControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -127,8 +122,8 @@ partial class AttachmentsControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -140,8 +135,8 @@ partial class CarbonLinkControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -153,8 +148,8 @@ partial class WorkspaceControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -166,8 +161,8 @@ partial class SettingsControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -179,8 +174,8 @@ partial class PublicControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -192,8 +187,8 @@ partial class FavoriteControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -205,8 +200,8 @@ partial class GateControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -218,8 +213,8 @@ partial class HealthControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -231,8 +226,8 @@ partial class HeardStatusControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -244,8 +239,8 @@ partial class HomeControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -257,8 +252,8 @@ partial class LabelControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -270,8 +265,8 @@ partial class LinkControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -283,8 +278,8 @@ partial class LogControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -296,8 +291,8 @@ partial class MagiclinkControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -309,8 +304,8 @@ partial class MessageMetadataControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -322,8 +317,8 @@ partial class NotificationControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -335,8 +330,8 @@ partial class WellKnownControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -348,8 +343,8 @@ partial class OAuth2IntegrationControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -361,8 +356,8 @@ partial class OpengraphControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -374,8 +369,8 @@ partial class PaymentPlanControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -387,8 +382,8 @@ partial class AppStoreControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -400,8 +395,8 @@ partial class StripeControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -413,8 +408,8 @@ partial class PlayStoreControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -426,8 +421,8 @@ partial class PlaylistControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -439,8 +434,8 @@ partial class PushControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -452,8 +447,8 @@ partial class ReactionControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -465,8 +460,8 @@ partial class SearchControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -478,8 +473,8 @@ partial class StreamControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -491,8 +486,8 @@ partial class StatisticsControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -504,8 +499,8 @@ partial class TokenControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -517,8 +512,8 @@ partial class VoicemailControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -530,8 +525,8 @@ partial class ActionItemControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -543,8 +538,8 @@ partial class UsersSCIMControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -556,8 +551,8 @@ partial class LanguageControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -569,8 +564,8 @@ partial class InboxNotificationControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -582,8 +577,8 @@ partial class MessageForwardControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -595,8 +590,8 @@ partial class MessageShareLinkControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -608,8 +603,8 @@ partial class OpenAiChatBotTestControllerClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -634,8 +629,8 @@ partial class IndexChannelClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -647,8 +642,8 @@ partial class GetMessageStatsClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -660,8 +655,8 @@ partial class GenerateTextModelClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -673,8 +668,8 @@ partial class GetWelcomeMessageClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -686,8 +681,8 @@ partial class StartChannelMessageV3Client
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -699,8 +694,8 @@ partial class StartPrerecordedMessageClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -712,8 +707,8 @@ partial class StartLabeledMessageClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -725,8 +720,8 @@ partial class StartWelcomeMessageClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -738,8 +733,8 @@ partial class TranslateMessagesClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -751,8 +746,8 @@ partial class TranslateMessagesV4Client
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -764,8 +759,8 @@ partial class GetStreamKeyV3Client
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -777,8 +772,8 @@ partial class GetMessagesByIdClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -790,8 +785,8 @@ partial class GetMessagesByIdV4Client
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -803,8 +798,8 @@ partial class UpsertMessageSummaryClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -816,8 +811,8 @@ partial class GetNotifiedMessagesClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -829,8 +824,8 @@ partial class GetMessagesBySequenceIdClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -842,8 +837,8 @@ partial class GetNotifiedMessagesV3Client
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -855,8 +850,8 @@ partial class UpdateMessageNameClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -868,8 +863,8 @@ partial class GetPrerecordedMessagesClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -881,8 +876,8 @@ partial class CreatePrerecordedMessageClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -894,8 +889,8 @@ partial class StartVoiceMemoMessageClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -907,8 +902,8 @@ partial class StartStoredMessageClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -920,8 +915,8 @@ partial class GetVoicememoMessagesClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -933,8 +928,8 @@ partial class GetVoicememoMessagesV4Client
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -946,8 +941,8 @@ partial class DeleteMessagesByIdClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -959,8 +954,8 @@ partial class GetMessageInteractionsClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -972,8 +967,8 @@ partial class SendPrerecordedMessageClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -985,8 +980,8 @@ partial class ReplyWithPrerecordedMessageClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -998,8 +993,8 @@ partial class SendExistingMessageClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1011,8 +1006,8 @@ partial class SendExistingMessageAsReplyClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1024,8 +1019,8 @@ partial class UpdateTranscriptClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1037,8 +1032,8 @@ partial class GetMessageByIdV4Client
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1050,8 +1045,8 @@ partial class FindUnverifiedMessagesClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1063,8 +1058,8 @@ partial class AddDubbedAudioClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1076,8 +1071,8 @@ partial class UserProfileV3Client
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1089,8 +1084,8 @@ partial class GetMyContactIdsV2Client
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1102,8 +1097,8 @@ partial class TrainUserVoiceV3Client
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1115,8 +1110,8 @@ partial class CreateDerivedConversationV2Client
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1128,8 +1123,8 @@ partial class GetSignedUrlV3Client
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1141,8 +1136,8 @@ partial class GetSignedUrlForDownloadV3Client
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1154,8 +1149,8 @@ partial class UpdateWorkspaceRoleClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1167,8 +1162,8 @@ partial class GetWorkspaceV3Client
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1180,8 +1175,8 @@ partial class GetWorkspacesV3Client
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1193,8 +1188,8 @@ partial class GetWorkspaceLogoClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1206,8 +1201,8 @@ partial class AddWorkspaceLogoClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1219,8 +1214,8 @@ partial class CreateWorkspaceClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1232,8 +1227,8 @@ partial class UpdateWorkspaceClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1245,8 +1240,8 @@ partial class AddDomainToWorkspaceClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1258,8 +1253,8 @@ partial class RemoveDomainToWorkspaceClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1271,8 +1266,8 @@ partial class AddPhoneNumberClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1284,8 +1279,8 @@ partial class SetVanityNameClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1297,8 +1292,8 @@ partial class GetSuggestedWorkspacesClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1310,8 +1305,8 @@ partial class JoinWorkspaceClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1323,8 +1318,8 @@ partial class RedeemGateTokenV3Client
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1336,8 +1331,8 @@ partial class MagiclinkV3Client
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1349,8 +1344,8 @@ partial class GetUrlInfoV2Client
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1362,8 +1357,8 @@ partial class SearchV2Client
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1375,8 +1370,8 @@ partial class MyClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1388,8 +1383,8 @@ partial class IntoClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1401,8 +1396,8 @@ partial class FromClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1414,8 +1409,8 @@ partial class FilterClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1427,8 +1422,8 @@ partial class CreateClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1440,8 +1435,8 @@ partial class ByClient
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }
@@ -1453,8 +1448,8 @@ partial class GetMessageShareLinkV3Client
     {
         settings.Converters.Add(
             new Newtonsoft.Json.Converters.StringEnumConverter(
-                namingStrategy: null,
-                allowIntegerValues: false
+                
+                
             )
         );
     }

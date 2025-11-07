@@ -20431,7 +20431,7 @@ namespace Loudspeaker.ApiClients
                         ProcessResponse(client_, response_);
 
                         var status_ = (int)response_.StatusCode;
-                        if (status_ == 200)
+                        if (status_ == 201)
                         {
                             var objectResponse_ = await ReadObjectResponseAsync<System.Collections.Generic.ICollection<Contact>>(response_, headers_, cancellationToken).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
@@ -57645,9 +57645,8 @@ namespace Loudspeaker.ApiClients
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public System.DateTimeOffset Created_at { get; set; } = default!;
 
-        [Newtonsoft.Json.JsonProperty("last_updated_at", Required = Newtonsoft.Json.Required.Always)]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        public System.DateTimeOffset Last_updated_at { get; set; } = default!;
+        [Newtonsoft.Json.JsonProperty("last_updated_at", Required = Newtonsoft.Json.Required.AllowNull)]
+        public System.DateTimeOffset? Last_updated_at { get; set; } = default!;
 
         [Newtonsoft.Json.JsonProperty("workspace_guids", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
@@ -57656,6 +57655,9 @@ namespace Loudspeaker.ApiClients
         [Newtonsoft.Json.JsonProperty("workspace_roles", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public System.Collections.Generic.ICollection<WorkspaceRole> Workspace_roles { get; set; } = new System.Collections.Generic.List<WorkspaceRole>();
+
+        [Newtonsoft.Json.JsonProperty("is_allowed_to_receive_notification", Required = Newtonsoft.Json.Required.Always)]
+        public bool Is_allowed_to_receive_notification { get; set; } = default!;
 
         [Newtonsoft.Json.JsonProperty("user_type", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]

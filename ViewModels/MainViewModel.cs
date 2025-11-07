@@ -16,6 +16,8 @@ using ReactiveUI;
 using SocketIOClient;
 using UserModel = Loudspeaker.Models.User;
 using static Loudspeaker.Services.Logger;
+using System.Collections.Generic;
+using Splat;
 
 namespace Loudspeaker.ViewModels;
 
@@ -59,6 +61,7 @@ public class MainViewModel : ViewModelBase, IDisposable
         Log("[MainViewModel] LibVLC initialized");
 
         Messages = new ObservableCollection<MessageV2>();
+        Contacts = new Dictionary<string,Contact>();
         SignOutCommand = ReactiveCommand.Create(SignOut);
         PlayAudioCommand = ReactiveCommand.CreateFromTask<MessageV2>(PlayAudioAsync);
 
@@ -153,9 +156,9 @@ public class MainViewModel : ViewModelBase, IDisposable
                     }
                     
                     Log($"[MainViewModel] Waiting 3 seconds before starting HLS playback for URL: {m3u8Url}");
-                    //await Task.Delay(3000);
+                    await Task.Delay(3000);
                     Log($"[MainViewModel] Starting HLS playback for URL: {m3u8Url}");
-                    //await PlayHlsStreamAsync(m3u8Url);
+                    await PlayHlsStreamAsync(m3u8Url);
                 }
                 else
                 {
@@ -197,9 +200,9 @@ public class MainViewModel : ViewModelBase, IDisposable
                 Log("[MainViewModel] Found newest message with non-streaming audio, preparing playback");
 
                 // Stop any active HLS playback before starting downloadable audio
-                StopHlsPlayback();
+                //StopHlsPlayback();
 
-                await PlayAudioAsync(message);
+                //await PlayAudioAsync(message);
             }
             else
             {
@@ -427,17 +430,61 @@ public class MainViewModel : ViewModelBase, IDisposable
         }
     }
 
+    private async Task<Contact?> GetContactAsync(string userId)
+    {
+        if (Contacts.TryGetValue(userId, out var ct))
+        {
+            return ct;
+        }
+
+
+        try
+        {
+            var client = _apiClient.GetUserClient();
+            var contacts = await client.GetMyContactsAsync(new UserSearchParameters() { User_guids = new List<string> { userId } });
+
+            if (contacts != null)
+            {
+                foreach (var contact in contacts)
+                {
+                    Contacts[contact.User_guid] = contact;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            var exception = e;
+            while (exception != null)
+            {
+                Log(exception.Message);
+                if (exception.StackTrace != null)
+                {
+                    Log(exception.StackTrace);
+                }
+                exception = exception.InnerException;
+            }
+        }
+            
+            if (Contacts.TryGetValue(userId, out var ct2))
+        {
+            return ct2;
+        }
+        return null;
+    }
+
     private async Task LoadMessagesAsync()
     {
         IsLoadingMessages = true;
         MessagesError = null;
 
+
+
         try
         {
             Log("[MainViewModel] Loading recent messages...");
             var client = _apiClient.GetRecentMessagesV3Client();
-            
-            
+
+
             var queryParams = new MessageQueryParameters
             {
                 Date = DateTimeOffset.UtcNow,
@@ -447,13 +494,15 @@ public class MainViewModel : ViewModelBase, IDisposable
             };
 
             var messages = await client.V3Async(queryParams);
-            
+
             Messages.Clear();
             if (messages != null)
             {
                 // Take only the 10 most recent messages
-                foreach (var message in messages.OrderByDescending(m=>m.Created_at).Take(10))
+                foreach (var message in messages.OrderByDescending(m => m.Created_at).Take(10))
                 {
+                    message.CreatorContact = await GetContactAsync(message.Creator_id);
+
                     Messages.Add(message);
                 }
                 Log($"[MainViewModel] Loaded {Messages.Count} messages");
@@ -474,6 +523,8 @@ public class MainViewModel : ViewModelBase, IDisposable
     public ICommand SignOutCommand { get; }
 
     public ObservableCollection<MessageV2> Messages { get; }
+
+    public Dictionary<string,Contact> Contacts{ get; }
 
     public string UserDisplayName
     {
